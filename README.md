@@ -59,6 +59,21 @@ Or you can run the tool directly from the directory or add it to your path:
 copycat --help
 ```
 
+### Quick start with uv
+
+``` shell
+uv venv
+
+# activate venv (PowerShell)
+.\.venv\Scripts\activate
+# activate venv (Linux/WSL)
+source .venv/bin/activate
+
+uv pip install -e .
+
+uv run -m copycat --gui
+```
+
 ```shell
 usage: copycat [-h] [--verbose] [--debug] [--quiet | --no-quiet | -q] [--version] [--gui] [--theme THEME] [--speed SPEED] [--reply REPLY]
 
