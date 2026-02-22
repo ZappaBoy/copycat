@@ -110,8 +110,8 @@ Select the name of the macro and click on the `save` button.
 
 Once you have a macro saved, you can replay it in two ways:
 
-1. by clicking on the `replay` button, and selecting the macro you want to replay and the replay `speed` (1.0 is the
-   real record speed).
+1. by clicking on the `replay` button, and selecting the macro you want to replay, the replay `speed` (1.0 is the
+   real record speed), and the repeat count (1 = once).
 2. by running the tool with the `--reply` option:
 
 ``` shell

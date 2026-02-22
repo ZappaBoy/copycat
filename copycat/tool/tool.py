@@ -26,6 +26,7 @@ Copycat was created by ZappaBoy.
 
 DEFAULT_THEME: str = "equilux"
 DEFAULT_SPEED: float = 1.0
+DEFAULT_REPEAT: int = 1
 NO_MACRO_SELECTED: str = "No macro selected"
 DEFAULT_GEOMETRY_POPUP: str = "600x260"
 
@@ -50,6 +51,7 @@ class Tool:
         self.manage_window_popup: tk.Toplevel | None = None
         self.macro_name_input: tk.Entry | None = None
         self.speed_input: tk.Entry | None = None
+        self.repeat_input: tk.Entry | None = None
         self.selected_macro_name: tk.StringVar | None = None
         self.available_macro_names: List[str] = []
         self.manage_macro_selector: tk.OptionMenu | None = None
@@ -157,6 +159,11 @@ class Tool:
         self.speed_input = tk.Entry(self.replay_window_popup)
         self.speed_input.insert(0, str(self.speed))
         self.speed_input.pack()
+        label = tk.Label(self.replay_window_popup, text=f"Repeat count: {DEFAULT_REPEAT}")
+        label.pack()
+        self.repeat_input = tk.Entry(self.replay_window_popup)
+        self.repeat_input.insert(0, str(DEFAULT_REPEAT))
+        self.repeat_input.pack()
         replay_button = ttk.Button(self.replay_window_popup, text="Replay", command=self.replay_macro)
         replay_button.pack(side=tk.LEFT, expand=True)
         close_button = ttk.Button(self.replay_window_popup, text="Close", command=self.replay_window_popup.destroy)
@@ -195,26 +202,40 @@ class Tool:
     def replay_macro(self):
         macro_name = self.selected_macro_name.get()
         speed = self.speed_input.get()
+        repeat = self.repeat_input.get()
         try:
             speed = float(speed)
         except ValueError:
             self.logger.error(f"Invalid speed value: {speed}. Using default speed {DEFAULT_SPEED}")
             speed = DEFAULT_SPEED
+        try:
+            repeat = int(repeat)
+        except ValueError:
+            self.logger.error(f"Invalid repeat value: {repeat}. Using default repeat {DEFAULT_REPEAT}")
+            repeat = DEFAULT_REPEAT
+        if repeat < DEFAULT_REPEAT:
+            self.logger.error(f"Invalid repeat value: {repeat}. Using default repeat {DEFAULT_REPEAT}")
+            repeat = DEFAULT_REPEAT
         self.speed = speed
         if macro_name == NO_MACRO_SELECTED:
             return
         self.hide_window()
-        self.play_macro(macro_name)
+        self.play_macro(macro_name, repeat=repeat)
         self.show_window()
 
-    def play_macro(self, macro_name: str):
+    def play_macro(self, macro_name: str, repeat: int = DEFAULT_REPEAT):
         self.logger.debug(f"Playing macro {macro_name}")
         history = self.storage_service.load_history(macro_name=macro_name)
         self.start_exit_key_listener()
         self.stop_event = threading.Event()
-        thread = threading.Thread(target=self.playback_service.play, args=(history, self.speed, self.stop_event))
-        thread.start()
-        thread.join()
+        for index in range(repeat):
+            if self.stop_event.is_set():
+                break
+            thread = threading.Thread(target=self.playback_service.play, args=(history, self.speed, self.stop_event))
+            thread.start()
+            thread.join()
+            if index < repeat - 1 and not self.stop_event.is_set():
+                self.stop_event.wait(1.0)
         self.stop_event = None
         self.stop_exit_key_listener()
 
