@@ -23,7 +23,7 @@ joblib = "^1.4.2"
 pyautogui = "^0.9.54"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.3.1"
+pytest = ">=7.3.1,<10.0.0"
 python-dotenv = "^1.0.0"
 poetry2setup = "^1.1.0"
 pytest-env = "^0.8.1"
